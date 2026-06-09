@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EnglishPath — CEFR Learning Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F2EC;--surface:#FEFCF8;--surface2:#F0ECE4;--text:#1A1714;--text2:#6B6560;--text3:#9E9892;--accent:#2C4A3E;--accent2:#4A7C6F;--accent-light:#E8F0EE;--gold:#C8922A;--gold-light:#FBF3E3;--red:#B84040;--red-light:#FAEAEA;--border:rgba(26,23,20,0.1);--border2:rgba(26,23,20,0.06);--shadow:0 2px 12px rgba(0,0,0,0.06);--shadow-lg:0 8px 32px rgba(0,0,0,0.1);--r:10px;--r-lg:16px;--font-display:'Playfair Display',Georgia,serif;--font-body:'DM Sans',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+#auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--accent);padding:2rem}
+.auth-card{background:var(--surface);border-radius:var(--r-lg);padding:3rem 2.5rem;width:100%;max-width:420px;box-shadow:var(--shadow-lg)}
+.auth-logo{font-family:var(--font-display);font-size:2rem;color:var(--accent);margin-bottom:.25rem}
+.auth-logo span{color:var(--gold)}
+.auth-subtitle{color:var(--text2);font-size:14px;margin-bottom:2rem}
+.auth-tabs{display:flex;gap:4px;margin-bottom:1.5rem;background:var(--surface2);border-radius:8px;padding:4px}
+.auth-tab{flex:1;padding:.5rem;text-align:center;cursor:pointer;border-radius:6px;font-size:14px;font-weight:500;color:var(--text2);transition:all .2s;border:none;background:transparent}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px}
+.form-input{width:100%;padding:.65rem 1rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);font-family:var(--font-body);font-size:15px;color:var(--text);outline:none;transition:border .2s}
+.form-input:focus{border-color:var(--accent2)}
+.btn-primary{width:100%;padding:.8rem;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--font-body);font-size:15px;font-weight:500;cursor:pointer;transition:background .2s;margin-top:.5rem}
+.btn-primary:hover{background:var(--accent2)}
+#app{display:none;min-height:100vh}
+.sidebar{position:fixed;top:0;left:0;width:240px;height:100vh;background:var(--accent);display:flex;flex-direction:column;padding:1.5rem 0;z-index:100;overflow-y:auto}
+.sidebar-logo{font-family:var(--font-display);font-size:1.5rem;color:#fff;padding:0 1.5rem;margin-bottom:2rem}
+.sidebar-logo span{color:var(--gold)}
+.sidebar-section{padding:0 1rem;margin-bottom:.5rem}
+.sidebar-section-label{font-size:10px;font-weight:600;letter-spacing:.1em;color:rgba(255,255,255,.4);padding:0 .5rem;margin-bottom:.5rem;text-transform:uppercase}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:.6rem .75rem;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.65);font-size:14px;font-weight:400;transition:all .15s;border:none;background:transparent;width:100%;text-align:left}
+.sidebar-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar-item.active{background:rgba(255,255,255,.15);color:#fff;font-weight:500}
+.sidebar-footer{margin-top:auto;padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.1);font-size:13px;color:rgba(255,255,255,.5)}
+.sidebar-user{color:rgba(255,255,255,.85);font-weight:500;margin-bottom:2px}
+.logout-btn{background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:12px;padding:0;font-family:var(--font-body)}
+.logout-btn:hover{color:rgba(255,255,255,.7)}
+.main{margin-left:240px;padding:2rem 2.5rem;min-height:100vh}
+.page-header{margin-bottom:2rem}
+.page-header h1{font-family:var(--font-display);font-size:1.75rem;font-weight:500}
+.page-header p{color:var(--text2);font-size:14px;margin-top:4px}
+.card{background:var(--surface);border-radius:var(--r-lg);border:1px solid var(--border2);padding:1.5rem;box-shadow:var(--shadow)}
+.card-title{font-weight:600;font-size:15px;margin-bottom:1rem}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--surface);border-radius:var(--r);padding:1.25rem 1.5rem;border:1px solid var(--border2)}
+.stat-label{font-size:12px;color:var(--text2);margin-bottom:4px}
+.stat-value{font-family:var(--font-display);font-size:2rem;font-weight:500}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.level-badge{display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:.04em}
+.level-a1{background:#EAF7EC;color:#2A7D3A}
+.level-a2{background:#E8F4E8;color:#3A7A2A}
+.level-b1{background:#FBF3E3;color:#9B6B1A}
+.level-b2{background:#FEF0D8;color:#B87820}
+.level-c1{background:#F0EBF8;color:#6B3EA8}
+.level-c2{background:#EBE8F8;color:#5430A0}
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.module-card{background:var(--surface);border-radius:var(--r-lg);border:1px solid var(--border2);overflow:hidden;transition:box-shadow .2s,transform .2s;cursor:pointer}
+.module-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.module-card.locked{opacity:.55;cursor:default}
+.module-card.locked:hover{box-shadow:var(--shadow);transform:none}
+.module-header{padding:1.25rem 1.5rem 1rem;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:flex-start}
+.module-body{padding:1rem 1.5rem 1.25rem}
+.module-title{font-weight:600;font-size:15px;margin-bottom:4px}
+.module-desc{font-size:13px;color:var(--text2);line-height:1.5}
+.module-footer{padding:.75rem 1.5rem;background:var(--surface2);display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text2)}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .5s}
+.lesson-header{background:var(--accent);color:#fff;padding:1.5rem 2rem;border-radius:var(--r-lg);margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between}
+.lesson-title{font-family:var(--font-display);font-size:1.5rem}
+.lesson-subtitle{font-size:14px;opacity:.7;margin-top:4px}
+.vocab-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.vocab-item{background:var(--bg);border-radius:8px;padding:.75rem 1rem;border:1px solid var(--border)}
+.vocab-word{font-weight:600;font-size:15px}
+.vocab-phonetic{font-size:12px;color:var(--text3);margin:2px 0;font-style:italic}
+.vocab-def{font-size:13px;color:var(--text2)}
+.vocab-example{font-size:12px;color:var(--text3);margin-top:4px;font-style:italic}
+.exercise{margin-bottom:1.5rem}
+.exercise-q{font-weight:500;margin-bottom:.75rem}
+.exercise-options{display:flex;flex-direction:column;gap:.5rem}
+.option-btn{padding:.65rem 1rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);text-align:left;cursor:pointer;font-family:var(--font-body);font-size:14px;color:var(--text);transition:all .15s}
+.option-btn:hover{border-color:var(--accent2);background:var(--accent-light)}
+.option-btn.correct{background:#EAF7EC;border-color:#2A7D3A;color:#2A7D3A}
+.option-btn.wrong{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.fill-input{width:100%;padding:.65rem 1rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);font-family:var(--font-body);font-size:15px;color:var(--text);outline:none}
+.fill-input:focus{border-color:var(--accent2)}
+.teacher-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.module-manager-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border2)}
+.module-manager-item:last-child{border-bottom:none}
+.toggle-switch{position:relative;width:44px;height:24px;cursor:pointer}
+.toggle-switch input{display:none}
+.toggle-track{width:100%;height:100%;background:var(--surface2);border-radius:12px;border:1px solid var(--border);transition:background .2s}
+.toggle-switch input:checked~.toggle-track{background:var(--accent2);border-color:var(--accent2)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle-switch input:checked~.toggle-thumb{transform:translateX(20px)}
+.btn-sm{padding:.4rem 1rem;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body);border:1px solid var(--border);background:var(--surface);color:var(--text);transition:all .15s}
+.btn-sm:hover{background:var(--surface2)}
+.btn-sm.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-sm.primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn-sm.danger{background:var(--red-light);color:var(--red);border-color:var(--red)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;font-weight:600;color:var(--text2);text-align:left;padding:.75rem 1rem;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em}
+td{padding:.85rem 1rem;border-bottom:1px solid var(--border2);font-size:14px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-light);color:var(--accent);font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;flex-shrink:0}
+.student-name{display:flex;align-items:center}
+.notif{position:fixed;top:1.5rem;right:1.5rem;z-index:999;background:var(--accent);color:#fff;padding:1rem 1.5rem;border-radius:var(--r);box-shadow:var(--shadow-lg);font-size:14px;opacity:0;transform:translateY(-10px);transition:all .3s;pointer-events:none}
+.notif.show{opacity:1;transform:translateY(0)}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.5rem}
+.tab{padding:.75rem 1.25rem;cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font-body)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover:not(.active){color:var(--text)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-group select,.form-group textarea{width:100%;padding:.65rem 1rem;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);font-family:var(--font-body);font-size:15px;color:var(--text);outline:none}
+.form-group textarea{resize:vertical;min-height:80px}
+.result-banner{padding:1.5rem;border-radius:var(--r-lg);text-align:center;margin-top:1rem}
+.result-banner.pass{background:#EAF7EC;border:1px solid #8FD0A0}
+.result-banner.fail{background:var(--red-light);border:1px solid #E8AAAA}
+.result-score{font-family:var(--font-display);font-size:3rem;font-weight:700}
+.result-banner.pass .result-score{color:#2A7D3A}
+.result-banner.fail .result-score{color:var(--red)}
+.back-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--text2);cursor:pointer;font-family:var(--font-body);font-size:14px;padding:0;margin-bottom:1.25rem}
+.back-btn:hover{color:var(--text)}
+.empty-state{text-align:center;padding:3rem;color:var(--text2)}
+.grammar-box{background:var(--accent-light);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1rem}
+.grammar-rule{display:grid;grid-template-columns:160px 1fr;gap:1rem;padding:.5rem 0;border-bottom:1px solid var(--border);font-size:13px}
+.grammar-rule:last-child{border-bottom:none}
+.tip-box{background:var(--gold-light);border:1px solid var(--gold);border-radius:8px;padding:.75rem 1rem;font-size:13px;margin-top:.75rem}
+</style>
+</head>
+<body>
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">English<span>Path</span></div>
+    <p class="auth-subtitle">Plataforma de inglês CEFR — A1 ao C2</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Cadastrar</button>
+    </div>
+    <div id="login-form">
+      <div class="form-group"><label>E-mail</label><input class="form-input" type="email" id="login-email" placeholder="seu@email.com"></div>
+      <div class="form-group"><label>Senha</label><input class="form-input" type="password" id="login-password" placeholder="••••••••"></div>
+      <button class="btn-primary" onclick="doLogin()">Entrar na plataforma</button>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="form-group"><label>Nome completo</label><input class="form-input" type="text" id="reg-name" placeholder="Seu nome"></div>
+      <div class="form-group"><label>E-mail</label><input class="form-input" type="email" id="reg-email" placeholder="seu@email.com"></div>
+      <div class="form-group"><label>Senha</label><input class="form-input" type="password" id="reg-password" placeholder="••••••••"></div>
+      <button class="btn-primary" onclick="doRegister()">Criar conta de aluno</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:1rem">v4.0 — EnglishPath</p>
+  </div>
+</div>
+<div id="app">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">English<span>Path</span></div>
+    <div id="sidebar-nav"></div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebar-user-name"></div>
+      <div id="sidebar-role" style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:6px"></div>
+      <button class="logout-btn" onclick="doLogout()">Sair da conta</button>
+    </div>
+  </nav>
+  <main class="main" id="main-content"></main>
+</div>
+<div class="notif" id="notif"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDuJnuCUh1FqhdCFcpcvzMNoMr0P7aZ8i4",
+  authDomain: "englishpath-5d3fd.firebaseapp.com",
+  projectId: "englishpath-5d3fd",
+  storageBucket: "englishpath-5d3fd.firebasestorage.app",
+  messagingSenderId: "776472364976",
+  appId: "1:776472364976:web:d32a67bdaf1f70e59bf875"
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+
+// ── DATA ─────────────────────────────────────
+const MODULES = [
+  {id:'a1',level:'A1',title:'Beginner',desc:'Fundamentos do inglês: saudações, números, cores e apresentações.',unlocked:true,order:1},
+  {id:'a2',level:'A2',title:'Elementary',desc:'Rotinas diárias, família, presente simples e vocabulário essencial.',unlocked:true,order:2},
+  {id:'b1',level:'B1',title:'Intermediate',desc:'Viagens, passado simples, expressões idiomáticas e conversação.',unlocked:false,order:3},
+  {id:'b2',level:'B2',title:'Upper-Intermediate',desc:'Negócios, passiva, tempos verbais avançados e escrita formal.',unlocked:false,order:4},
+  {id:'c1',level:'C1',title:'Advanced',desc:'Nuances da língua, textos acadêmicos, debates e argumentação.',unlocked:false,order:5},
+  {id:'c2',level:'C2',title:'Proficiency',desc:'Domínio completo: literatura, registros formais e informais.',unlocked:false,order:6},
+];
+
+const LESSONS = {
+  a1:[
+    {id:'a1-l1',title:'Greetings & Introductions',unlocked:true,
+     grammar:{title:'Verb "To Be" — Presente',explanation:'O verbo "to be" significa "ser" ou "estar". É o verbo mais importante do inglês!',
+       rules:[{s:'I',f:'am',e:'I am Ana. (Eu sou Ana.)'},{s:'You',f:'are',e:'You are a student.'},{s:'He/She/It',f:'is',e:'She is my teacher.'},{s:'We/They',f:'are',e:'We are friends.'}],
+       tip:'💡 "I am" = "I\'m" | "You are" = "You\'re" | "He is" = "He\'s"'},
+     listening:{title:'🎧 A conversation at school',
+       transcript:[{sp:'Ana',ln:"Hello! My name is Ana. What's your name?"},{sp:'Tom',ln:"Hi Ana! I'm Tom. Nice to meet you!"},{sp:'Ana',ln:"Nice to meet you too! Are you a student here?"},{sp:'Tom',ln:"Yes, I am. I'm in level A1. And you?"},{sp:'Ana',ln:"Me too! See you in class. Goodbye!"},{sp:'Tom',ln:"Goodbye! See you later!"}],
+       questions:[{q:"What is the girl's name?",o:['Maria','Ana','Sara','Lisa'],a:1},{q:"What level is Tom in?",o:['B1','A2','A1','C1'],a:2},{q:"How does Ana say goodbye?",o:['Sorry!','Please!','Goodbye!','Thank you!'],a:2}]},
+     vocab:[{w:'Hello',p:'/həˈloʊ/',d:'Olá, oi',e:'"Hello! My name is Ana."'},{w:'Goodbye',p:'/ˌɡʊdˈbaɪ/',d:'Tchau, adeus',e:'"Goodbye! See you tomorrow."'},{w:'Please',p:'/pliːz/',d:'Por favor',e:'"Please, help me."'},{w:'Thank you',p:'/ˈθæŋk juː/',d:'Obrigado(a)',e:'"Thank you very much!"'},{w:'Sorry',p:"/ˈsɒri/",d:'Desculpe',e:'"Sorry, I don\'t understand."'},{w:'Excuse me',p:'/ɪkˈskjuːz miː/',d:'Com licença',e:'"Excuse me, where is the library?"'},{w:'Nice to meet you',p:'/naɪs tə miːt juː/',d:'Prazer em conhecê-lo(a)',e:'"Nice to meet you, Tom!"'},{w:'See you later',p:'/siː juː ˈleɪtər/',d:'Até mais tarde',e:'"See you later, Ana!"'}],
+     exercises:[{t:'m',q:'What does "goodbye" mean?',o:['Olá','Obrigado','Tchau','Por favor'],a:2},{t:'m',q:'How do you say "por favor"?',o:['Sorry','Please','Hello','Thanks'],a:1},{t:'f',q:'Complete: "___ you very much!"',a:'thank'},{t:'m',q:'"Excuse me" means...',o:['Desculpe','Com licença','Oi','Adeus'],a:1},{t:'m',q:'"Nice to meet you" means...',o:['Até logo','Com licença','Prazer em conhecê-lo','Desculpe'],a:2},{t:'f',q:'Complete: "I ___ a student." (sou)',a:'am'},{t:'m',q:'Which is correct? "She ___ my teacher."',o:['am','are','is','be'],a:2},{t:'f',q:'Complete: "We ___ friends." (somos)',a:'are'},{t:'m',q:'Short form of "I am" is...',o:["I'm","I's","Im","Iam"],a:0},{t:'m',q:'"See you later" means...',o:['Bom dia','Até mais tarde','Com licença','Desculpe'],a:1}]},
+    {id:'a1-l2',title:'Numbers 1–20',unlocked:true,
+     grammar:{title:'How old are you? — Perguntar a idade',explanation:'Para perguntar e responder sobre idade usamos o verbo "to be":',
+       rules:[{s:'Pergunta',f:'How old are you?',e:'Quantos anos você tem?'},{s:'Resposta',f:'I am + número + years old',e:'I am fifteen years old.'},{s:'Pergunta (ele/ela)',f:'How old is he/she?',e:'How old is she?'},{s:'Resposta',f:'He/She is + número + years old',e:'He is ten years old.'}],
+       tip:"💡 Em inglês informal é comum dizer apenas 'I'm fifteen.' sem o 'years old'."},
+     listening:{title:'🎧 At the birthday party',
+       transcript:[{sp:'Maria',ln:'Happy birthday, Tom! How old are you today?'},{sp:'Tom',ln:'Thank you, Maria! I am twelve years old today!'},{sp:'Maria',ln:'Twelve! Wow! And how many friends are coming?'},{sp:'Tom',ln:"Fifteen friends! The party starts at three o'clock."},{sp:'Maria',ln:'Great! I have five presents for you!'},{sp:'Tom',ln:'Five presents? You are amazing! Thank you!'}],
+       questions:[{q:'How old is Tom today?',o:['Ten','Fifteen','Twelve','Twenty'],a:2},{q:'How many friends are coming?',o:['Five','Ten','Twenty','Fifteen'],a:3},{q:'How many presents does Maria have?',o:['Three','Five','Twelve','One'],a:1}]},
+     vocab:[{w:'One',p:'/wʌn/',d:'Um, uma',e:'"I have one cat."'},{w:'Two',p:'/tuː/',d:'Dois, duas',e:'"Two apples, please."'},{w:'Three',p:'/θriː/',d:'Três',e:'"I have three brothers."'},{w:'Four',p:'/fɔːr/',d:'Quatro',e:'"Four seasons in a year."'},{w:'Five',p:'/faɪv/',d:'Cinco',e:'"There are five books."'},{w:'Six',p:'/sɪks/',d:'Seis',e:'"Six days of work."'},{w:'Seven',p:"/ˈsɛvən/",d:'Sete',e:'"Seven days in a week."'},{w:'Eight',p:'/eɪt/',d:'Oito',e:'"Eight hours of sleep."'},{w:'Nine',p:'/naɪn/',d:'Nove',e:'"Nine students in class."'},{w:'Ten',p:'/tɛn/',d:'Dez',e:'"Ten fingers."'},{w:'Eleven',p:"/ɪˈlɛvən/",d:'Onze',e:'"Eleven players."'},{w:'Twelve',p:'/twɛlv/',d:'Doze',e:'"Twelve months."'},{w:'Fifteen',p:"/fɪfˈtiːn/",d:'Quinze',e:'"She is fifteen."'},{w:'Twenty',p:"/ˈtwɛnti/",d:'Vinte',e:'"Twenty dollars."'}],
+     exercises:[{t:'m',q:'How do you say "cinco"?',o:['Four','Six','Five','Seven'],a:2},{t:'f',q:'Write the number 20 in English:',a:'twenty'},{t:'m',q:'"Twelve" means...',o:['Onze','Doze','Treze','Catorze'],a:1},{t:'m',q:'How many days in a week?',o:['Five','Six','Eight','Seven'],a:3},{t:'f',q:'Complete: "How old ___ you?"',a:'are'},{t:'m',q:'"How old are you?" means...',o:['Qual é seu nome?','Quantos anos você tem?','Como vai?','De onde você é?'],a:1},{t:'f',q:'Complete: "I ___ fifteen years old."',a:'am'},{t:'m',q:'What comes after "eight"?',o:['Seven','Six','Nine','Ten'],a:2},{t:'m',q:'"Eleven" means...',o:['Dez','Doze','Onze','Nove'],a:2},{t:'f',q:'There are ___ months in a year.',a:'twelve'}]},
+    {id:'a1-l3',title:'Colors & Adjectives',unlocked:false,
+     grammar:{title:'Adjectives — Como usar adjetivos em inglês',explanation:'Em inglês, os adjetivos sempre vêm ANTES do substantivo!',
+       rules:[{s:'Inglês',f:'adjective + noun',e:'a red car (um carro vermelho)'},{s:'Português',f:'substantivo + adjetivo',e:'um carro vermelho'},{s:'Com "to be"',f:'subject + is/are + adjective',e:'The car is red.'},{s:'Plural',f:'subject + are + adjective',e:'The flowers are beautiful.'}],
+       tip:'💡 Os adjetivos em inglês NÃO mudam para masculino/feminino nem para plural!'},
+     listening:{title:'🎧 Describing my bedroom',
+       transcript:[{sp:'Lucy',ln:'Hi! This is my bedroom. It is small but nice.'},{sp:'Lucy',ln:'My walls are white and my door is brown.'},{sp:'Lucy',ln:'I have a big blue bed and a small red chair.'},{sp:'Lucy',ln:'My desk is black and my lamp is yellow.'},{sp:'Lucy',ln:'I am very happy in my room! It is beautiful!'}],
+       questions:[{q:"What color are Lucy's walls?",o:['Blue','White','Red','Yellow'],a:1},{q:'What color is the bed?',o:['Red','Black','Blue','Brown'],a:2},{q:'What color is the lamp?',o:['White','Green','Red','Yellow'],a:3}]},
+     vocab:[{w:'Red',p:'/rɛd/',d:'Vermelho',e:'"The car is red."'},{w:'Blue',p:'/bluː/',d:'Azul',e:'"The sky is blue."'},{w:'Green',p:'/ɡriːn/',d:'Verde',e:'"The tree is green."'},{w:'Yellow',p:"/ˈjɛloʊ/",d:'Amarelo',e:'"The sun is yellow."'},{w:'White',p:'/waɪt/',d:'Branco',e:'"The wall is white."'},{w:'Black',p:'/blæk/',d:'Preto',e:'"My bag is black."'},{w:'Big',p:'/bɪɡ/',d:'Grande',e:'"That is a big house."'},{w:'Small',p:'/smɔːl/',d:'Pequeno',e:'"My room is small."'},{w:'Happy',p:"/ˈhæpi/",d:'Feliz',e:'"I am very happy today!"'},{w:'Beautiful',p:"/ˈbjuːtɪfəl/",d:'Bonito(a)',e:'"This is a beautiful city."'},{w:'Old',p:'/oʊld/',d:'Velho(a)',e:'"This is an old book."'},{w:'New',p:'/njuː/',d:'Novo(a)',e:'"I have a new phone."'}],
+     exercises:[{t:'m',q:'What color is "azul"?',o:['Red','Green','Blue','Yellow'],a:2},{t:'f',q:'"The tree is ___." (verde)',a:'green'},{t:'m',q:'In English, where does the adjective go?',o:['After the noun','Before the noun','At the end','After the verb'],a:1},{t:'m',q:'Which is correct?',o:['A car red','A red car','Car a red','Red a car'],a:1},{t:'f',q:'"The sun is ___." (amarelo)',a:'yellow'},{t:'m',q:'"Beautiful" means...',o:['Grande','Feliz','Bonito(a)','Novo(a)'],a:2},{t:'f',q:'"My bag is ___." (preta)',a:'black'},{t:'m',q:'Opposite of "big" is...',o:['Old','Happy','New','Small'],a:3},{t:'m',q:'"white" in "The walls are white" is...',o:['A verb','A noun','An adjective','A number'],a:2},{t:'f',q:'I have a ___ phone. (novo)',a:'new'}]},
+    {id:'a1-l4',title:'Verb To Be — Full Lesson',unlocked:false,
+     grammar:{title:'Verb "To Be" — Afirmativa, Negativa e Interrogativa',explanation:'O verbo "to be" tem três formas no presente: AM, IS e ARE.',
+       rules:[{s:'✅ Afirmativa',f:'I am / You are / He-She-It is / We-They are',e:'She is a doctor.'},{s:'❌ Negativa',f:'I am not / You are not / He is not',e:'I am not tired.'},{s:'❓ Interrogativa',f:'Am I? / Are you? / Is he?',e:'Are you a student?'},{s:'💬 Resposta curta',f:'Yes, I am. / No, I\'m not.',e:'Are you happy? Yes, I am!'}],
+       tip:"💡 Contrações: 'is not' = 'isn't' | 'are not' = 'aren't'"},
+     listening:{title:"🎧 Are you a student?",
+       transcript:[{sp:'Teacher',ln:'Good morning, class! Are you ready?'},{sp:'Students',ln:'Yes, we are!'},{sp:'Teacher',ln:'Is Maria here today?'},{sp:'Student',ln:"No, she isn't. She is sick today."},{sp:'Teacher',ln:'Oh no! Is she at home?'},{sp:'Student',ln:"Yes, she is. She isn't in the hospital."},{sp:'Teacher',ln:'Are you all from Brazil?'},{sp:'Students',ln:'Yes, we are! We are Brazilian!'}],
+       questions:[{q:'Are the students ready?',o:["No, they aren't",'Yes, they are','Maybe','The teacher is ready'],a:1},{q:'Where is Maria?',o:['At school','At the hospital','At home','At work'],a:2},{q:'Where are the students from?',o:['England','USA','Portugal','Brazil'],a:3}]},
+     vocab:[{w:"I am (I'm)",p:'/aɪ æm/',d:'Eu sou/estou',e:'"I\'m a student."'},{w:"You are (You're)",p:'/juː ɑːr/',d:'Você é/está',e:'"You\'re very kind."'},{w:"He is (He's)",p:'/hiː ɪz/',d:'Ele é/está',e:'"He\'s my brother."'},{w:"She is (She's)",p:'/ʃiː ɪz/',d:'Ela é/está',e:'"She\'s a doctor."'},{w:"We are (We're)",p:'/wiː ɑːr/',d:'Nós somos/estamos',e:'"We\'re friends."'},{w:"They are (They're)",p:'/ðeɪ ɑːr/',d:'Eles/Elas são/estão',e:'"They\'re from Brazil."'},{w:"Is not (isn't)",p:"/ˈɪznt/",d:'Não é/está',e:'"She isn\'t tired."'},{w:"Are not (aren't)",p:"/ˈɑːrnt/",d:'Não são/estão',e:'"They aren\'t here."'}],
+     exercises:[{t:'m',q:'"She ___ a doctor."',o:['am','are','is','be'],a:2},{t:'f',q:'"I ___ not happy."',a:'am'},{t:'m',q:'"___ you a student?"',o:['Is','Am','Are','Be'],a:2},{t:'f',q:'"They ___ from Brazil."',a:'are'},{t:'m',q:'Short form of "is not" is...',o:["isn't","amn't","aren't","not is"],a:0},{t:'m',q:'"Are you happy?" — Correct answer:',o:['Yes, I is.','Yes, I am.','Yes, you are.','Yes, he is.'],a:1},{t:'f',q:'"We ___ friends."',a:'are'},{t:'m',q:'Which sentence is correct?',o:['He am a teacher.','He are a teacher.','He is a teacher.','He be a teacher.'],a:2},{t:'f',q:'"She ___ sick today." (não está)',a:"isn't"},{t:'m',q:'"They ___ Brazilian."',o:['is','am','are','be'],a:2}]},
+    {id:'a1-l5',title:'Family & Pronouns',unlocked:false,
+     grammar:{title:'Subject Pronouns — Pronomes Pessoais',explanation:'Os pronomes pessoais substituem os nomes. Em inglês são obrigatórios!',
+       rules:[{s:'I',f:'Eu',e:'"I am a student."'},{s:'You',f:'Você/Tu/Vocês',e:'"You are my friend."'},{s:'He/She/It',f:'Ele/Ela/Isso',e:'"He is my father. She is my mother."'},{s:'We/They',f:'Nós/Eles-Elas',e:'"We are a family."'}],
+       tip:"💡 'It' é usado para animais e objetos, não para pessoas!"},
+     listening:{title:'🎧 My family',
+       transcript:[{sp:'Jack',ln:'Hi! My name is Jack. I have a big family!'},{sp:'Jack',ln:'My father is Tom. He is forty years old.'},{sp:'Jack',ln:'My mother is Sara. She is thirty-eight years old.'},{sp:'Jack',ln:'I have one brother. His name is Ben. He is ten years old.'},{sp:'Jack',ln:'I also have one sister. Her name is Lily. She is six years old.'},{sp:'Jack',ln:'We are a happy family!'}],
+       questions:[{q:"What is Jack's father's name?",o:['Ben','Jack','Tom','Sam'],a:2},{q:"How old is Jack's brother Ben?",o:['Six','Ten','Forty','Twelve'],a:1},{q:"What is Jack's sister's name?",o:['Sara','Ana','Maria','Lily'],a:3}]},
+     vocab:[{w:'Father/Dad',p:"/ˈfɑːðər/",d:'Pai/Papai',e:'"My father is a teacher."'},{w:'Mother/Mom',p:"/ˈmʌðər/",d:'Mãe/Mamãe',e:'"My mother is a nurse."'},{w:'Brother',p:"/ˈbrʌðər/",d:'Irmão',e:'"I have one brother."'},{w:'Sister',p:"/ˈsɪstər/",d:'Irmã',e:'"My sister is twelve."'},{w:'Grandfather',p:"/ˈɡrændfɑːðər/",d:'Avô',e:'"My grandfather is seventy."'},{w:'Grandmother',p:"/ˈɡrændmʌðər/",d:'Avó',e:'"My grandmother is sixty-five."'},{w:'Son',p:'/sʌn/',d:'Filho',e:'"He is my son."'},{w:'Daughter',p:"/ˈdɔːtər/",d:'Filha',e:'"She is my daughter."'},{w:'Family',p:"/ˈfæməli/",d:'Família',e:'"I love my family."'},{w:'Friend',p:'/frɛnd/',d:'Amigo(a)',e:'"She is my best friend."'}],
+     exercises:[{t:'m',q:'"Father" means...',o:['Irmão','Avô','Pai','Filho'],a:2},{t:'f',q:'"My ___ is twelve years old." (irmã)',a:'sister'},{t:'m',q:'Which pronoun for a woman?',o:['He','It','They','She'],a:3},{t:'m',q:'"My father" can be replaced by...',o:['She','They','He','We'],a:2},{t:'f',q:'"___ are a happy family." (Nós)',a:'we'},{t:'m',q:'"Daughter" means...',o:['Filho','Filha','Irmã','Avó'],a:1},{t:'f',q:'"My ___ is sixty-five." (avó)',a:'grandmother'},{t:'m',q:'Pronoun for a dog?',o:['He','She','It','They'],a:2},{t:'m',q:'"We" in Portuguese means...',o:['Você','Ele','Nós','Eles'],a:2},{t:'f',q:'"___ is my best friend." (Ela)',a:'she'}]},
+    {id:'a1-l6',title:'Days, Months & Time',unlocked:false,
+     grammar:{title:'Preposições de Tempo — On, In, At',explanation:'Em inglês usamos preposições diferentes para falar de tempo:',
+       rules:[{s:'ON',f:'Dias da semana e datas',e:'on Monday / on June 5th'},{s:'IN',f:'Meses, anos e partes do dia',e:'in January / in the morning'},{s:'AT',f:'Horas e momentos específicos',e:"at 8 o'clock / at night"},{s:'Atenção!',f:'Sem preposição com today/tomorrow',e:'Class is today.'}],
+       tip:'💡 ON = dia específico | IN = período amplo | AT = hora exata'},
+     listening:{title:'🎧 My weekly schedule',
+       transcript:[{sp:'Pedro',ln:'I have English class on Monday and Wednesday.'},{sp:'Pedro',ln:"The class is at nine o'clock in the morning."},{sp:'Pedro',ln:'On Friday, I study at home in the afternoon.'},{sp:'Pedro',ln:'In January, we have a big English test.'},{sp:'Pedro',ln:"On Sundays, I rest. I don't study on Sundays!"}],
+       questions:[{q:'When does Pedro have English class?',o:['Tuesday and Thursday','Monday and Wednesday','Friday and Sunday','Monday and Friday'],a:1},{q:'What time is the class?',o:["At ten o'clock","At eight o'clock","At nine o'clock","At noon"],a:2},{q:'When is the big test?',o:['In December','In February','In March','In January'],a:3}]},
+     vocab:[{w:'Monday',p:"/ˈmʌndeɪ/",d:'Segunda-feira',e:'"Class is on Monday."'},{w:'Tuesday',p:"/ˈtjuːzdeɪ/",d:'Terça-feira',e:'"I work on Tuesday."'},{w:'Wednesday',p:"/ˈwɛnzdeɪ/",d:'Quarta-feira',e:'"See you on Wednesday!"'},{w:'Thursday',p:"/ˈθɜːrzdeɪ/",d:'Quinta-feira',e:'"The test is on Thursday."'},{w:'Friday',p:"/ˈfraɪdeɪ/",d:'Sexta-feira',e:'"I love Fridays!"'},{w:'Saturday',p:"/ˈsætərdeɪ/",d:'Sábado',e:'"No school on Saturday."'},{w:'Sunday',p:"/ˈsʌndeɪ/",d:'Domingo',e:'"Sunday is my favorite day."'},{w:'January',p:"/ˈdʒænjuɛri/",d:'Janeiro',e:'"My birthday is in January."'},{w:'Morning',p:"/ˈmɔːrnɪŋ/",d:'Manhã',e:'"Class is in the morning."'},{w:'Afternoon',p:"/ˌæftərˈnuːn/",d:'Tarde',e:'"I study in the afternoon."'},{w:'Night',p:'/naɪt/',d:'Noite',e:'"I sleep at night."'},{w:'Today',p:"/təˈdeɪ/",d:'Hoje',e:'"Today is Monday."'}],
+     exercises:[{t:'m',q:'"Wednesday" is...',o:['Terça','Quinta','Quarta','Sexta'],a:2},{t:'f',q:'Class is ___ Monday.',a:'on'},{t:'m',q:'Preposition for months?',o:['On','At','In','By'],a:2},{t:'f',q:"The class is ___ 9 o'clock.",a:'at'},{t:'m',q:'"Friday" in Portuguese is...',o:['Quinta','Sexta','Sábado','Segunda'],a:1},{t:'m',q:'"I study ___ the morning."',o:['on','at','in','by'],a:2},{t:'f',q:'"My birthday is ___ January."',a:'in'},{t:'m',q:'"Sunday" is...',o:['Sábado','Sexta','Segunda','Domingo'],a:3},{t:'f',q:'"___ is my favorite day." (Sexta)',a:'friday'},{t:'m',q:'Preposition with "night"?',o:['On','In','At','By'],a:2}]},
+    {id:'a1-l7',title:'Food & Drinks',unlocked:false,
+     grammar:{title:"I like / I don't like — Expressar gostos",explanation:"Para falar o que você gosta ou não gosta usamos 'like':",
+       rules:[{s:'✅ Afirmativa',f:'I like + noun',e:'I like pizza.'},{s:'❌ Negativa',f:"I don't like + noun",e:"I don't like coffee."},{s:'❓ Pergunta',f:'Do you like + noun?',e:'Do you like chocolate?'},{s:'💬 Resposta',f:"Yes, I do. / No, I don't.",e:"Do you like tea? Yes, I do!"}],
+       tip:"💡 'I like' = gosto em geral | 'I'd like' = quero agora (pedido)"},
+     listening:{title:'🎧 At the restaurant',
+       transcript:[{sp:'Waiter',ln:"Good evening! Welcome to Green Garden Restaurant."},{sp:'Ana',ln:"Thank you! I'd like a pizza, please."},{sp:'Waiter',ln:'Of course! Do you like cheese?'},{sp:'Ana',ln:"Yes, I love cheese! But I don't like mushrooms."},{sp:'Waiter',ln:'And to drink? Do you like orange juice?'},{sp:'Ana',ln:"Yes, please! I'd like a large orange juice."},{sp:'Waiter',ln:'Perfect! Your order will be ready in ten minutes.'}],
+       questions:[{q:'What does Ana order to eat?',o:['Pasta','Pizza','Salad','Sandwich'],a:1},{q:'What does Ana NOT like?',o:['Cheese','Orange juice','Mushrooms','Pizza'],a:2},{q:'How long will the order take?',o:['Five minutes','Twenty minutes','Ten minutes','One hour'],a:2}]},
+     vocab:[{w:'Apple',p:"/ˈæpəl/",d:'Maçã',e:'"I eat an apple every day."',img:'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=200&h=120&fit=crop'},{w:'Bread',p:'/brɛd/',d:'Pão',e:'"I like bread with butter."',img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=120&fit=crop'},{w:'Water',p:"/ˈwɔːtər/",d:'Água',e:'"I drink water every day."',img:'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=200&h=120&fit=crop'},{w:'Milk',p:'/mɪlk/',d:'Leite',e:'"I drink milk in the morning."',img:'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=200&h=120&fit=crop'},{w:'Rice',p:'/raɪs/',d:'Arroz',e:'"Rice is popular in Brazil."',img:'https://images.unsplash.com/photo-1536304929831-ee1ca9d44906?w=200&h=120&fit=crop'},{w:'Chicken',p:"/ˈtʃɪkɪn/",d:'Frango',e:'"I like grilled chicken."',img:'https://images.unsplash.com/photo-1598103442097-8b74394b95c3?w=200&h=120&fit=crop'},{w:'Coffee',p:"/ˈkɒfi/",d:'Café',e:'"I drink coffee in the morning."',img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&h=120&fit=crop'},{w:'Orange',p:"/ˈɒrɪndʒ/",d:'Laranja',e:'"I like orange juice."',img:'https://images.unsplash.com/photo-1547514701-42782101795e?w=200&h=120&fit=crop'},{w:'Egg',p:'/ɛɡ/',d:'Ovo',e:'"I eat two eggs for breakfast."',img:'https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=200&h=120&fit=crop'},{w:'Banana',p:"/bəˈnɑːnə/",d:'Banana',e:'"Bananas are yellow and sweet."',img:'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=200&h=120&fit=crop'}],
+     exercises:[{t:'m',q:'"I ___ like mushrooms."',o:['do','does',"don't","doesn't"],a:2},{t:'f',q:'"___ you like coffee?"',a:'do'},{t:'m',q:'"Apple" means...',o:['Laranja','Banana','Maçã','Uva'],a:2},{t:'f',q:'"I like ___." (pão)',a:'bread'},{t:'m',q:'"I like rice" in Portuguese:',o:['Eu gosto de frango.','Eu gosto de arroz.','Eu gosto de leite.','Eu gosto de ovo.'],a:1},{t:'m',q:'"Do you like tea?" — Affirmative:',o:['Yes, I like.','Yes, I do.','Yes, I am.','Yes, I does.'],a:1},{t:'f',q:'"I drink ___ in the morning." (café)',a:'coffee'},{t:'m',q:'"Chicken" means...',o:['Peixe','Carne','Frango','Porco'],a:2},{t:'f',q:'"Bananas are yellow and ___." (doces)',a:'sweet'},{t:'m',q:'Negative of "I like pizza":',o:['I not like pizza.','I likes not pizza.',"I don't like pizza.",'I am not like pizza.'],a:2}]},
+    {id:'a1-l8',title:'School & Classroom',unlocked:false,
+     grammar:{title:'There is / There are — Indicar existência',explanation:'Usamos "there is" e "there are" para dizer que algo existe:',
+       rules:[{s:'There is',f:'Singular (1 objeto)',e:'There is a book on the desk.'},{s:'There are',f:'Plural (2+ objetos)',e:'There are twenty students.'},{s:'Negativa',f:"There isn't / There aren't",e:"There isn't a pen here."},{s:'Pergunta',f:'Is there? / Are there?',e:'Is there a board in the room?'}],
+       tip:"💡 'There is' = 'Há/Tem' (singular) | 'There are' = 'Há/Tem' (plural)"},
+     listening:{title:'🎧 First day at school',
+       transcript:[{sp:'Teacher',ln:'Good morning everyone! Welcome to your first English class!'},{sp:'Teacher',ln:'There are fifteen students in this class today.'},{sp:'Teacher',ln:'There is a board, a desk, and twenty chairs in our classroom.'},{sp:'Student',ln:'Teacher, is there a dictionary in the class?'},{sp:'Teacher',ln:'Yes! There are three dictionaries on my desk.'},{sp:'Student',ln:'Are there computers here?'},{sp:'Teacher',ln:"No, there aren't. But there is a tablet for each student!"}],
+       questions:[{q:'How many students are in the class?',o:['Ten','Twenty','Fifteen','Twelve'],a:2},{q:"How many dictionaries are on the teacher's desk?",o:['One','Two','Five','Three'],a:3},{q:'Are there computers in the class?',o:['Yes, there are.','No, there aren\'t.','Yes, one.','No information.'],a:1}]},
+     vocab:[{w:'Classroom',p:"/ˈklɑːsruːm/",d:'Sala de aula',e:'"Our classroom is big."',img:'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=200&h=120&fit=crop'},{w:'Book',p:'/bʊk/',d:'Livro',e:'"I have a new English book."',img:'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=200&h=120&fit=crop'},{w:'Pen',p:'/pɛn/',d:'Caneta',e:'"Can I borrow your pen?"',img:'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=200&h=120&fit=crop'},{w:'Pencil',p:"/ˈpɛnsəl/",d:'Lápis',e:'"I write with a pencil."',img:'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=200&h=120&fit=crop'},{w:'Board',p:'/bɔːrd/',d:'Quadro (lousa)',e:'"The teacher writes on the board."',img:'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=200&h=120&fit=crop'},{w:'Desk',p:'/dɛsk/',d:'Mesa',e:'"My books are on the desk."',img:'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=200&h=120&fit=crop'},{w:'Chair',p:'/tʃɛər/',d:'Cadeira',e:'"Please sit on your chair."',img:'https://images.unsplash.com/photo-1592078615290-033ee584e267?w=200&h=120&fit=crop'},{w:'Notebook',p:"/ˈnoʊtbʊk/",d:'Caderno',e:'"I write in my notebook."',img:'https://images.unsplash.com/photo-1517842645767-c639042777db?w=200&h=120&fit=crop'},{w:'Teacher',p:"/ˈtiːtʃər/",d:'Professor(a)',e:'"My teacher is very kind."',img:'https://images.unsplash.com/photo-1544717305-2782549b5136?w=200&h=120&fit=crop'},{w:'Student',p:"/ˈstjuːdənt/",d:'Aluno(a)',e:'"I am a good student."',img:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=200&h=120&fit=crop'}],
+     exercises:[{t:'m',q:'"There ___ a book on the desk."',o:['are','is','am','be'],a:1},{t:'f',q:'"There ___ twenty students."',a:'are'},{t:'m',q:'"Classroom" means...',o:['Biblioteca','Sala de aula','Laboratório','Ginásio'],a:1},{t:'f',q:'"The teacher writes on the ___." (quadro)',a:'board'},{t:'m',q:'"There ___ a pen here." (negativa)',o:["isn't","aren't","is not a","don't"],a:0},{t:'m',q:'"Is there a dictionary?" — Affirmative:',o:['Yes, there is.','Yes, there are.','Yes, it is.','Yes, I am.'],a:0},{t:'f',q:'"I write in my ___." (caderno)',a:'notebook'},{t:'m',q:'"Student" means...',o:['Professor','Diretor','Aluno','Pai'],a:2},{t:'f',q:'"Can I borrow your ___?" (caneta)',a:'pen'},{t:'m',q:'Which is correct?',o:['There are a cat.','There is two cats.','There are two cats.','There am a cat.'],a:2}]},
+    {id:'a1-l9',title:'Body & Health',unlocked:false,
+     grammar:{title:"Have got — Ter (corpo e posses)",explanation:"'Have got' expressa posse. Muito usado no inglês britânico:",
+       rules:[{s:'✅ Afirmativa',f:"I have got / He has got",e:"I've got blue eyes."},{s:'❌ Negativa',f:"I haven't got / He hasn't got",e:"She hasn't got a headache."},{s:'❓ Pergunta',f:"Have you got? / Has he got?",e:"Have you got a fever?"},{s:'💬 Resposta',f:"Yes, I have. / No, I haven't.",e:"Have you got a cold? Yes, I have."}],
+       tip:"💡 'I've got' = 'I have got' | 'He's got' = 'He has got'"},
+     listening:{title:"🎧 At the doctor's office",
+       transcript:[{sp:'Doctor',ln:'Good morning! How are you feeling today?'},{sp:'Tom',ln:"Not very well. I've got a headache and a sore throat."},{sp:'Doctor',ln:'Have you got a fever?'},{sp:'Tom',ln:'Yes, I have. My temperature is thirty-eight degrees.'},{sp:'Doctor',ln:'And have you got a cough?'},{sp:'Tom',ln:'Yes, a little. My chest hurts too.'},{sp:'Doctor',ln:"You've got a cold. Rest at home and drink lots of water."}],
+       questions:[{q:'What does Tom have?',o:['Headache and fever only','Headache and sore throat','Cough and stomachache','Fever and broken arm'],a:1},{q:"What is Tom's temperature?",o:['36 degrees','37 degrees','38 degrees','39 degrees'],a:2},{q:'What does the doctor recommend?',o:['Go to hospital','Take medicine','Rest at home and drink water','Do exercise'],a:2}]},
+     vocab:[{w:'Head',p:'/hɛd/',d:'Cabeça',e:'"I have a headache."',img:'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=200&h=120&fit=crop'},{w:'Eyes',p:'/aɪz/',d:'Olhos',e:'"She has green eyes."',img:'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=120&fit=crop'},{w:'Mouth',p:'/maʊθ/',d:'Boca',e:'"Open your mouth, please."',img:'https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=200&h=120&fit=crop'},{w:'Hand',p:'/hænd/',d:'Mão',e:'"Wash your hands!"',img:'https://images.unsplash.com/photo-1584515933487-779824d29309?w=200&h=120&fit=crop'},{w:'Leg',p:'/lɛɡ/',d:'Perna',e:'"My leg hurts."',img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop'},{w:'Arm',p:'/ɑːrm/',d:'Braço',e:'"She broke her arm."',img:'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=120&fit=crop'},{w:'Headache',p:"/ˈhɛdeɪk/",d:'Dor de cabeça',e:"\"I've got a headache.\"",img:'https://images.unsplash.com/photo-1541199249251-f713e6145474?w=200&h=120&fit=crop'},{w:'Fever',p:"/ˈfiːvər/",d:'Febre',e:'"He has a high fever."',img:'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&h=120&fit=crop'},{w:'Doctor',p:"/ˈdɒktər/",d:'Médico(a)',e:'"I need to see a doctor."',img:'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&h=120&fit=crop'},{w:'Hospital',p:"/ˈhɒspɪtəl/",d:'Hospital',e:'"She is in the hospital."',img:'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=200&h=120&fit=crop'}],
+     exercises:[{t:'m',q:"\"I've got a headache.\" means...",o:['Estou com fome','Estou com dor de cabeça','Estou com febre','Estou com frio'],a:1},{t:'f',q:'"Have you got a fever?" — "Yes, I ___."',a:'have'},{t:'m',q:'"She ___ got green eyes."',o:['have','has','had','having'],a:1},{t:'f',q:'"Wash your ___!" (mãos)',a:'hands'},{t:'m',q:'"He ___ got a cold." (negativa)',o:["haven't","hasn't","don't","doesn't"],a:1},{t:'m',q:'"Doctor" means...',o:['Enfermeiro','Médico','Farmacêutico','Dentista'],a:1},{t:'f',q:'"My ___ hurts." (perna)',a:'leg'},{t:'m',q:'"Have you got a headache?" — Negative:',o:["No, I haven't.","No, I don't.","No, I hasn't.","No, I not."],a:0},{t:'f',q:'"She ___ her arm." (quebrou)',a:'broke'},{t:'m',q:'"Eyes" in Portuguese means...',o:['Orelhas','Nariz','Olhos','Boca'],a:2}]},
+    {id:'a1-l10',title:'Places in the City',unlocked:false,
+     grammar:{title:'Preposições de Lugar — In, On, At, Next to, Near',explanation:'Para indicar onde algo está usamos preposições de lugar:',
+       rules:[{s:'IN',f:'Dentro de um lugar fechado',e:'The book is in the bag.'},{s:'ON',f:'Sobre uma superfície',e:'The pen is on the desk.'},{s:'AT',f:'Em um ponto específico',e:"I am at the bus stop."},{s:'NEXT TO / NEAR',f:'Ao lado / Perto de',e:'The bank is next to the park.'}],
+       tip:'💡 "Where is the...?" = "Onde fica o/a...?" — Use para perguntar localização!'},
+     listening:{title:'🎧 Asking for directions',
+       transcript:[{sp:'Tourist',ln:'Excuse me! Is there a pharmacy near here?'},{sp:'Local',ln:'Yes! There is a pharmacy on Green Street.'},{sp:'Tourist',ln:'Where is Green Street?'},{sp:'Local',ln:'Go straight and turn left at the traffic light.'},{sp:'Tourist',ln:'Is it far from here?'},{sp:'Local',ln:"No, it's very near! It's next to the supermarket."},{sp:'Tourist',ln:'Thank you so much!'},{sp:'Local',ln:"You're welcome! Have a nice day!"}],
+       questions:[{q:'What place is the tourist looking for?',o:['Hospital','Bank','Pharmacy','School'],a:2},{q:'Where is the pharmacy?',o:['On Blue Street','On Green Street','On Main Street','On Park Avenue'],a:1},{q:'What is next to the pharmacy?',o:['The park','The bank','The school','The supermarket'],a:3}]},
+     vocab:[{w:'School',p:'/skuːl/',d:'Escola',e:'"I go to school every day."',img:'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=200&h=120&fit=crop'},{w:'Hospital',p:"/ˈhɒspɪtəl/",d:'Hospital',e:'"The hospital is near here."',img:'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=200&h=120&fit=crop'},{w:'Supermarket',p:"/ˈsuːpərmɑːrkɪt/",d:'Supermercado',e:'"I shop at the supermarket."',img:'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=120&fit=crop'},{w:'Bank',p:'/bæŋk/',d:'Banco',e:'"The bank is on Main Street."',img:'https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?w=200&h=120&fit=crop'},{w:'Park',p:'/pɑːrk/',d:'Parque',e:'"Children play in the park."',img:'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=200&h=120&fit=crop'},{w:'Restaurant',p:"/ˈrɛstərɒnt/",d:'Restaurante',e:"\"Let's eat at this restaurant.\"",img:'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=120&fit=crop'},{w:'Pharmacy',p:"/ˈfɑːrməsi/",d:'Farmácia',e:'"Buy medicine at the pharmacy."',img:'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=200&h=120&fit=crop'},{w:'Bus stop',p:'/bʌs stɒp/',d:'Ponto de ônibus',e:'"I wait at the bus stop."',img:'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=200&h=120&fit=crop'},{w:'Street',p:'/striːt/',d:'Rua',e:'"I live on Park Street."',img:'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=200&h=120&fit=crop'},{w:'Near',p:'/nɪər/',d:'Perto',e:'"The school is near my house."',img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=120&fit=crop'}],
+     exercises:[{t:'m',q:'"The book is ___ the bag." (dentro)',o:['on','at','in','near'],a:2},{t:'f',q:'"The pen is ___ the desk." (sobre)',a:'on'},{t:'m',q:'"Supermarket" means...',o:['Mercado','Farmácia','Supermercado','Banco'],a:2},{t:'f',q:'"The bank is ___ to the park." (ao lado)',a:'next'},{t:'m',q:'"Near" means...',o:['Longe','Dentro','Perto','Atrás'],a:2},{t:'m',q:'"Restaurant" in Portuguese is...',o:['Padaria','Restaurante','Café','Lanchonete'],a:1},{t:'f',q:'"I am ___ the bus stop." (no ponto)',a:'at'},{t:'m',q:'"Pharmacy" means...',o:['Hospital','Farmácia','Banco','Escola'],a:1},{t:'f',q:'"The school is ___ my house." (perto de)',a:'near'},{t:'m',q:'"Where is the bank?" means...',o:['O que é o banco?','Onde fica o banco?','Quando é o banco?','Quem é o banco?'],a:1}]},
+  ],
+  a2:[
+    {id:'a2-l1',title:'Daily Routines',unlocked:true,grammar:null,listening:null,
+     vocab:[{w:'Wake up',p:'/weɪk ʌp/',d:'Acordar',e:'"I wake up at 7 am."'},{w:'Have breakfast',p:'/hæv ˈbrɛkfəst/',d:'Tomar café da manhã',e:'"I have breakfast at 8."'},{w:'Go to work',p:'/ɡoʊ tə wɜːrk/',d:'Ir ao trabalho',e:'"She goes to work by bus."'},{w:'Come home',p:'/kʌm hoʊm/',d:'Chegar em casa',e:'"He comes home at 6 pm."'},{w:'Have dinner',p:'/hæv ˈdɪnər/',d:'Jantar',e:'"We have dinner together."'},{w:'Go to bed',p:'/ɡoʊ tə bɛd/',d:'Ir dormir',e:'"I go to bed at 11 pm."'}],
+     exercises:[{t:'m',q:'"Wake up" means...',o:['Dormir','Acordar','Almoçar','Trabalhar'],a:1},{t:'f',q:'"I ___ to bed at 10 pm."',a:'go'},{t:'m',q:'"Have breakfast" means...',o:['Almoçar','Jantar','Tomar café da manhã','Cozinhar'],a:2}]},
+    {id:'a2-l2',title:'Present Simple Tense',unlocked:false,grammar:null,listening:null,
+     vocab:[{w:'I work',p:'/aɪ wɜːrk/',d:'Eu trabalho',e:'"I work in an office."'},{w:'She works',p:'/ʃiː wɜːrks/',d:'Ela trabalha',e:'"She works every day."'},{w:"He doesn't like",p:"/hiː ˈdʌznt laɪk/",d:'Ele não gosta',e:'"He doesn\'t like coffee."'},{w:'Do you...?',p:'/duː juː/',d:'Você...? (pergunta)',e:'"Do you speak English?"'},{w:'Does she...?',p:'/dʌz ʃiː/',d:'Ela...? (pergunta)',e:'"Does she live here?"'}],
+     exercises:[{t:'m',q:'"She ___ to school every day."',o:['go','going','goes','gone'],a:2},{t:'f',q:'"He ___ not work on Sundays."',a:'does'}]},
+  ],
+  b1:[{id:'b1-l1',title:'Travelling & Transport',unlocked:true,grammar:null,listening:null,vocab:[{w:'Airport',p:"/ˈɛrpɔːrt/",d:'Aeroporto',e:'"We arrived at the airport early."'},{w:'Boarding pass',p:"/ˈbɔːrdɪŋ pæs/",d:'Cartão de embarque',e:'"Show me your boarding pass."'},{w:'Luggage',p:"/ˈlʌɡɪdʒ/",d:'Bagagem',e:'"My luggage is very heavy."'},{w:'Delay',p:"/dɪˈleɪ/",d:'Atraso',e:'"There is a two-hour delay."'}],exercises:[{t:'m',q:'"Luggage" means...',o:['Passaporte','Bagagem','Voo','Embarque'],a:1},{t:'f',q:'The flight has a ___. (atraso)',a:'delay'}]}],
+  b2:[{id:'b2-l1',title:'Business English',unlocked:false,grammar:null,listening:null,vocab:[{w:'Negotiate',p:"/nɪˈɡoʊʃieɪt/",d:'Negociar',e:'"We need to negotiate the price."'},{w:'Deadline',p:"/ˈdɛdlaɪn/",d:'Prazo final',e:'"The deadline is Friday."'},{w:'Revenue',p:"/ˈrɛvənjuː/",d:'Receita',e:'"Our revenue increased by 20%."'}],exercises:[{t:'m',q:'"Deadline" in Portuguese is...',o:['Início','Prazo final','Meta','Reunião'],a:1}]}],
+  c1:[{id:'c1-l1',title:'Academic Writing',unlocked:false,grammar:null,listening:null,vocab:[{w:'Furthermore',p:"/ˈfɜːrðərmɔːr/",d:'Além disso',e:'"Furthermore, the data supports our hypothesis."'},{w:'Nevertheless',p:"/ˌnɛvərðəˈlɛs/",d:'No entanto',e:'"Nevertheless, the results were surprising."'},{w:'Hypothesis',p:"/haɪˈpɒθɪsɪs/",d:'Hipótese',e:'"The hypothesis was confirmed."'}],exercises:[{t:'m',q:'"Furthermore" is used to...',o:['Contradizer','Adicionar informação','Concluir','Questionar'],a:1}]}],
+  c2:[{id:'c2-l1',title:'Idiomatic Mastery',unlocked:false,grammar:null,listening:null,vocab:[{w:'Bite the bullet',p:"/baɪt ðə ˈbʊlɪt/",d:'Encarar de frente',e:'"Just bite the bullet and do it."'},{w:'On the fence',p:'/ɒn ðə fɛns/',d:'Indeciso',e:"\"I'm still on the fence about it.\""},{w:'Cut corners',p:"/kʌt ˈkɔːrnərz/",d:'Fazer de qualquer jeito',e:'"Don\'t cut corners on quality."'}],exercises:[{t:'m',q:'"On the fence" means...',o:['Decidido','Errar','Indeciso','Honesto'],a:2}]}],
+};
+
+// User state — only this comes from Firebase
+let DB_USERS = [
+  {id:1,name:'Paulo Sérgio',email:'prof@englishpath.com',password:'LearnEnglish1',role:'teacher'},
+  {id:2,name:'Ana Lima',email:'ana@email.com',password:'123456',role:'student',level:'A1',completedLessons:[],quizScores:{}},
+  {id:3,name:'Carlos Mendes',email:'carlos@email.com',password:'123456',role:'student',level:'A2',completedLessons:[],quizScores:{}},
+];
+
+// Module unlock state — only this comes from Firebase
+let DB_MODULE_UNLOCKS = {}; // {a1:true, a2:true, b1:false, ...}
+let DB_LESSON_UNLOCKS = {}; // {'a1-l1':true, 'a1-l2':false, ...}
+
+function getModuleUnlocked(modId) {
+  if (DB_MODULE_UNLOCKS[modId] !== undefined) return DB_MODULE_UNLOCKS[modId];
+  return MODULES.find(m=>m.id===modId)?.unlocked || false;
+}
+function getLessonUnlocked(lessonId) {
+  if (DB_LESSON_UNLOCKS[lessonId] !== undefined) return DB_LESSON_UNLOCKS[lessonId];
+  const lesson = Object.values(LESSONS).flat().find(l=>l.id===lessonId);
+  return lesson?.unlocked || false;
+}
+
+// Firebase save/load — ONLY users and unlock states
+async function saveUsers() {
+  try { await setDoc(doc(db,'platform','users2'),{list:DB_USERS}); } catch(e) {}
+}
+async function saveUnlocks() {
+  try { await setDoc(doc(db,'platform','unlocks'),{modules:DB_MODULE_UNLOCKS,lessons:DB_LESSON_UNLOCKS}); } catch(e) {}
+}
+async function loadFromFirebase() {
+  try {
+    const usersSnap = await getDoc(doc(db,'platform','users2'));
+    if (usersSnap.exists() && usersSnap.data().list?.length) {
+      const saved = usersSnap.data().list;
+      DB_USERS = DB_USERS.map(u => { const s=saved.find(x=>x.email===u.email); return s?{...u,...s,password:u.password}:u; });
+      saved.forEach(s=>{ if(!DB_USERS.find(u=>u.email===s.email)) DB_USERS.push(s); });
+    }
+    const unlockSnap = await getDoc(doc(db,'platform','unlocks'));
+    if (unlockSnap.exists()) {
+      DB_MODULE_UNLOCKS = unlockSnap.data().modules || {};
+      DB_LESSON_UNLOCKS = unlockSnap.data().lessons || {};
+    }
+  } catch(e) { console.warn('Firebase load error',e); }
+}
+
+// App state
+let currentUser = null, currentView = 'dashboard', currentLesson = null;
+let quizAnswers = {}, quizSubmitted = false, listeningAnswers = {}, listeningSubmitted = false;
+
+// AUTH
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('login-form').style.display=tab==='login'?'':'none';
+  document.getElementById('register-form').style.display=tab==='register'?'':'none';
+}
+async function doLogin() {
+  const email=document.getElementById('login-email').value.trim();
+  const pwd=document.getElementById('login-password').value;
+  if(!email||!pwd){showNotif('Preencha e-mail e senha.');return;}
+  showNotif('Carregando...');
+  await loadFromFirebase();
+  const user=DB_USERS.find(u=>u.email===email&&u.password===pwd);
+  if(!user){showNotif('E-mail ou senha incorretos.');return;}
+  currentUser=user;
+  startApp();
+}
+async function doRegister() {
+  const name=document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pwd=document.getElementById('reg-password').value;
+  if(!name||!email||!pwd){showNotif('Preencha todos os campos.');return;}
+  await loadFromFirebase();
+  if(DB_USERS.find(u=>u.email===email)){showNotif('E-mail já cadastrado.');return;}
+  const newUser={id:Date.now(),name,email,password:pwd,role:'student',level:'A1',completedLessons:[],quizScores:{}};
+  DB_USERS.push(newUser);
+  await saveUsers();
+  currentUser=newUser;
+  showNotif(`Bem-vindo(a), ${name}!`);
+  startApp();
+}
+function doLogout(){currentUser=null;document.getElementById('app').style.display='none';document.getElementById('auth-screen').style.display='flex';}
+
+function startApp() {
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('sidebar-user-name').textContent=currentUser.name;
+  document.getElementById('sidebar-role').textContent=currentUser.role==='teacher'?'👨‍🏫 Professor':'🎓 Aluno';
+  buildSidebar();
+  setTimeout(()=>navigate('dashboard'),100);
+}
+
+function buildSidebar(){
+  const nav=document.getElementById('sidebar-nav');
+  if(currentUser.role==='teacher'){
+    nav.innerHTML=`<div class="sidebar-section"><div class="sidebar-section-label">Principal</div><button class="sidebar-item" onclick="navigate('dashboard')">📊 Dashboard</button><button class="sidebar-item" onclick="navigate('students')">👥 Alunos</button></div><div class="sidebar-section"><div class="sidebar-section-label">Conteúdo</div><button class="sidebar-item" onclick="navigate('modules')">📚 Módulos & Aulas</button></div><div class="sidebar-section"><div class="sidebar-section-label">Acesso</div><button class="sidebar-item" onclick="navigate('access')">🔓 Controle de Acesso</button></div>`;
+  } else {
+    nav.innerHTML=`<div class="sidebar-section"><div class="sidebar-section-label">Aprendizado</div><button class="sidebar-item" onclick="navigate('dashboard')">🏠 Início</button><button class="sidebar-item" onclick="navigate('my-courses')">📖 Meus Cursos</button><button class="sidebar-item" onclick="navigate('progress')">📈 Meu Progresso</button></div>`;
+  }
+  highlightNav();
+}
+function highlightNav(){document.querySelectorAll('.sidebar-item').forEach(b=>{b.classList.remove('active');if(b.textContent.toLowerCase().includes(currentView))b.classList.add('active');});}
+function navigate(view,data){currentView=view;quizAnswers={};quizSubmitted=false;listeningAnswers={};listeningSubmitted=false;highlightNav();const main=document.getElementById('main-content');if(currentUser.role==='teacher')renderTeacher(view,data,main);else renderStudent(view,data,main);}
+
+function levelBadge(level){const cls={A1:'level-a1',A2:'level-a2',B1:'level-b1',B2:'level-b2',C1:'level-c1',C2:'level-c2'};return `<span class="level-badge ${cls[level]||''}">${level}</span>`;}
+
+// TEACHER
+function renderTeacher(view,data,el){
+  if(view==='dashboard')el.innerHTML=teacherDashboard();
+  else if(view==='students')el.innerHTML=teacherStudents();
+  else if(view==='modules')el.innerHTML=teacherModules();
+  else if(view==='access')el.innerHTML=teacherAccess();
+}
+function teacherDashboard(){
+  const students=DB_USERS.filter(u=>u.role==='student');
+  const totalL=Object.values(LESSONS).flat().length;
+  const unlockedM=MODULES.filter(m=>getModuleUnlocked(m.id)).length;
+  const completions=students.reduce((a,s)=>a+(s.completedLessons||[]).length,0);
+  return `<div class="page-header"><h1>Painel do Professor</h1><p>Visão geral da plataforma EnglishPath</p></div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Alunos</div><div class="stat-value">${students.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Módulos ativos</div><div class="stat-value">${unlockedM}</div></div>
+    <div class="stat-card"><div class="stat-label">Total de aulas</div><div class="stat-value">${totalL}</div></div>
+    <div class="stat-card"><div class="stat-label">Conclusões</div><div class="stat-value">${completions}</div></div>
+  </div>
+  <div class="teacher-grid">
+    <div class="card"><div class="card-title">🎓 Progresso dos Alunos</div>${students.map(s=>{const done=(s.completedLessons||[]).length;const pct=totalL?Math.round(done/totalL*100):0;return `<div style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px"><span>${s.name}</span><span>${done}/${totalL} • ${pct}%</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>`;}).join('')}</div>
+    <div class="card"><div class="card-title">📚 Status dos Módulos</div>${MODULES.map(m=>`<div class="module-manager-item"><span style="font-size:14px">${levelBadge(m.level)} ${m.title}</span><label class="toggle-switch"><input type="checkbox" ${getModuleUnlocked(m.id)?'checked':''} onchange="toggleModule('${m.id}',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>`).join('')}</div>
+  </div>`;
+}
+function teacherStudents(){
+  const students=DB_USERS.filter(u=>u.role==='student');
+  const totalL=Object.values(LESSONS).flat().length;
+  return `<div class="page-header"><h1>Alunos</h1></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Aluno</th><th>Nível</th><th>Aulas</th><th>Progresso</th><th>Ações</th></tr></thead><tbody>${students.map(s=>{const done=(s.completedLessons||[]).length;const pct=totalL?Math.round(done/totalL*100):0;const ini=s.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();return `<tr><td><div class="student-name"><div class="avatar">${ini}</div>${s.name}</div></td><td>${levelBadge(s.level||'A1')}</td><td>${done}/${totalL}</td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${pct}%"></div></div><span style="font-size:12px">${pct}%</span></div></td><td><div style="display:flex;gap:6px"><button class="btn-sm" onclick="promoteStudent(${s.id})">Promover</button><button class="btn-sm danger" onclick="resetStudent(${s.id})">Resetar</button></div></td></tr>`;}).join('')}</tbody></table></div></div>`;
+}
+function teacherModules(){
+  return `<div class="page-header"><h1>Módulos & Aulas</h1></div>${MODULES.map(mod=>{const lessons=LESSONS[mod.id]||[];return `<div class="card" style="margin-bottom:1rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem"><div style="display:flex;align-items:center;gap:10px">${levelBadge(mod.level)}<span style="font-weight:600">${mod.title}</span><span style="font-size:13px;color:var(--text2)">${lessons.length} aulas</span></div><label class="toggle-switch"><input type="checkbox" ${getModuleUnlocked(mod.id)?'checked':''} onchange="toggleModule('${mod.id}',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div><div style="display:flex;flex-direction:column;gap:.5rem">${lessons.map(l=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;background:var(--bg);border-radius:8px;border:1px solid var(--border2)"><span style="font-size:14px">${getLessonUnlocked(l.id)?'✓':'🔒'} ${l.title}</span><label class="toggle-switch"><input type="checkbox" ${getLessonUnlocked(l.id)?'checked':''} onchange="toggleLesson('${l.id}',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>`).join('')}</div></div>`;}).join('')}`;
+}
+function teacherAccess(){
+  return `<div class="page-header"><h1>Controle de Acesso</h1></div><div class="teacher-grid"><div class="card"><div class="card-title">🔓 Módulos</div>${MODULES.map(m=>`<div class="module-manager-item">${levelBadge(m.level)} <span style="font-size:14px;margin-left:8px">${m.title}</span><label class="toggle-switch"><input type="checkbox" ${getModuleUnlocked(m.id)?'checked':''} onchange="toggleModule('${m.id}',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>`).join('')}</div><div class="card"><div class="card-title">📖 Aulas</div>${MODULES.map(mod=>{const lessons=LESSONS[mod.id]||[];return `<div style="margin-bottom:1rem"><div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;margin-bottom:.5rem">${mod.level} ${mod.title}</div>${lessons.map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border2)"><span style="font-size:13px">${l.title}</span><label class="toggle-switch"><input type="checkbox" ${getLessonUnlocked(l.id)?'checked':''} onchange="toggleLesson('${l.id}',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>`).join('')}</div>`;}).join('')}</div></div>`;
+}
+
+// STUDENT
+function renderStudent(view,data,el){
+  if(view==='dashboard')el.innerHTML=studentDashboard();
+  else if(view==='my-courses')el.innerHTML=studentCourses();
+  else if(view==='progress')el.innerHTML=studentProgress();
+  else if(view==='lesson')renderLesson(data,el);
+}
+function studentDashboard(){
+  const allL=Object.values(LESSONS).flat();
+  const done=(currentUser.completedLessons||[]).length;
+  const pct=allL.length?Math.round(done/allL.length*100):0;
+  const unlockedMods=MODULES.filter(m=>getModuleUnlocked(m.id));
+  const nextLesson=allL.find(l=>getLessonUnlocked(l.id)&&!(currentUser.completedLessons||[]).includes(l.id));
+  return `<div class="page-header"><h1>Olá, ${currentUser.name.split(' ')[0]}! 👋</h1><p>Continue aprendendo e avance no seu inglês</p></div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Seu nível</div><div style="margin-top:6px">${levelBadge(currentUser.level||'A1')}</div></div>
+    <div class="stat-card"><div class="stat-label">Aulas completas</div><div class="stat-value">${done}</div></div>
+    <div class="stat-card"><div class="stat-label">Progresso</div><div class="stat-value">${pct}%</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:${pct}%"></div></div></div>
+    <div class="stat-card"><div class="stat-label">Módulos ativos</div><div class="stat-value">${unlockedMods.length}</div></div>
+  </div>
+  ${nextLesson?`<div class="card" style="background:var(--accent);color:#fff;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem"><div><div style="font-size:12px;opacity:.6;margin-bottom:4px">CONTINUAR</div><div style="font-family:var(--font-display);font-size:1.25rem">${nextLesson.title}</div></div><button class="btn-sm" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff" onclick="navigate('lesson','${nextLesson.id}')">Iniciar →</button></div>`:''}
+  <div class="modules-grid">${MODULES.filter(m=>getModuleUnlocked(m.id)).map(m=>{const lessons=(LESSONS[m.id]||[]).filter(l=>getLessonUnlocked(l.id));const doneM=lessons.filter(l=>(currentUser.completedLessons||[]).includes(l.id)).length;const pctM=lessons.length?Math.round(doneM/lessons.length*100):0;return `<div class="module-card" onclick="navigate('my-courses')"><div class="module-header">${levelBadge(m.level)}<span style="font-size:13px;color:var(--text2)">${lessons.length} aulas</span></div><div class="module-body"><div class="module-title">${m.title}</div><div class="module-desc">${m.desc}</div><div class="progress-bar"><div class="progress-fill" style="width:${pctM}%"></div></div></div><div class="module-footer"><span>${doneM}/${lessons.length}</span><span style="color:var(--accent2)">${pctM}%</span></div></div>`;}).join('')}${MODULES.filter(m=>!getModuleUnlocked(m.id)).map(m=>`<div class="module-card locked"><div class="module-header">${levelBadge(m.level)}<span>🔒</span></div><div class="module-body"><div class="module-title">${m.title}</div><div class="module-desc">${m.desc}</div></div><div class="module-footer"><span>Aguardando liberação</span></div></div>`).join('')}</div>`;
+}
+function studentCourses(){
+  return `<div class="page-header"><h1>Meus Cursos</h1></div>${MODULES.map(mod=>{const lessons=LESSONS[mod.id]||[];return `<div style="margin-bottom:2rem"><div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">${levelBadge(mod.level)}<span style="font-family:var(--font-display);font-size:1.25rem">${mod.title}</span>${!getModuleUnlocked(mod.id)?'<span style="font-size:13px;color:var(--text3)">🔒 Bloqueado</span>':''}</div>${!getModuleUnlocked(mod.id)?`<div style="background:var(--surface2);border-radius:var(--r);padding:1rem;font-size:14px;color:var(--text2)">Este módulo ainda não foi liberado.</div>`:`<div style="display:flex;flex-direction:column;gap:.5rem">${lessons.map(l=>{const done=(currentUser.completedLessons||[]).includes(l.id);const unlocked=getLessonUnlocked(l.id);return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;background:var(--surface);border-radius:var(--r);border:1px solid var(--border2);${unlocked?'cursor:pointer;':'opacity:.5;'}" ${unlocked?`onclick="navigate('lesson','${l.id}')"`:''}><div style="display:flex;align-items:center;gap:10px"><span>${done?'✅':unlocked?'📖':'🔒'}</span><div><div style="font-weight:500">${l.title}</div><div style="font-size:12px;color:var(--text2)">${l.vocab.length} palavras • ${l.exercises.length} exercícios</div></div></div>${unlocked?`<span style="font-size:13px;color:${done?'var(--accent2)':'var(--text3)'}">${done?'Concluída':'Iniciar →'}</span>`:'<span style="font-size:12px;color:var(--text3)">Bloqueada</span>'}</div>`;}).join('')}</div>`}</div>`;}).join('')}`;
+}
+function studentProgress(){
+  const allL=Object.values(LESSONS).flat();
+  const done=(currentUser.completedLessons||[]).length;
+  const pct=allL.length?Math.round(done/allL.length*100):0;
+  const levels=['A1','A2','B1','B2','C1','C2'];
+  const idx=levels.indexOf(currentUser.level||'A1');
+  return `<div class="page-header"><h1>Meu Progresso</h1></div><div class="teacher-grid"><div class="card"><div class="card-title">📊 Progresso Geral</div><div style="text-align:center;padding:1rem 0"><div style="font-family:var(--font-display);font-size:3.5rem;color:var(--accent)">${pct}%</div><div style="color:var(--text2);font-size:14px">${done} de ${allL.length} aulas</div><div class="progress-bar" style="margin-top:1rem;height:8px"><div class="progress-fill" style="width:${pct}%"></div></div></div></div><div class="card"><div class="card-title">🏆 Trilha CEFR</div>${levels.map((lv,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:.6rem .75rem;border-radius:8px;background:${i===idx?'var(--accent-light)':'transparent'}">${levelBadge(lv)}<span style="font-size:14px;font-weight:${i===idx?600:400}">${MODULES.find(m=>m.level===lv)?.title||lv} ${i<idx?'✓':i===idx?'← atual':''}</span></div>`).join('')}</div></div><div class="card"><div class="card-title">📖 Aulas Concluídas</div>${(currentUser.completedLessons||[]).length===0?'<div class="empty-state"><div style="font-size:2rem">📚</div><div style="font-weight:600;margin:.5rem 0">Nenhuma aula concluída ainda</div></div>':`<div>${(currentUser.completedLessons||[]).map(lid=>{const l=allL.find(x=>x.id===lid);return l?`<div style="padding:.6rem 0;border-bottom:1px solid var(--border2);font-size:14px">✅ ${l.title}</div>`:''}).join('')}</div>`}</div>`;
+}
+
+function getLessonLevel(lid){for(const[mid,lessons]of Object.entries(LESSONS)){if(lessons.find(l=>l.id===lid))return MODULES.find(m=>m.id===mid)?.level||'A1';}return'A1';}
+
+function renderLesson(lessonId,el){
+  const lesson=Object.values(LESSONS).flat().find(l=>l.id===lessonId);
+  if(!lesson){el.innerHTML='<p>Aula não encontrada.</p>';return;}
+  currentLesson=lesson;
+  const hasG=!!lesson.grammar, hasL=!!lesson.listening;
+  el.innerHTML=`<button class="back-btn" onclick="navigate('my-courses')">← Voltar</button>
+  <div class="lesson-header"><div><div class="lesson-title">${lesson.title}</div><div class="lesson-subtitle">${lesson.vocab.length} palavras${hasG?' • 📝 Gramática':''}${hasL?' • 🎧 Listening':''} • ✏️ ${lesson.exercises.length} exercícios</div></div><div>${levelBadge(getLessonLevel(lesson.id))}</div></div>
+  <div class="tabs"><button class="tab active" onclick="switchTab('vocab',this)">📖 Vocabulário</button>${hasG?'<button class="tab" onclick="switchTab(\'grammar\',this)">📝 Gramática</button>':''}${hasL?'<button class="tab" onclick="switchTab(\'listening\',this)">🎧 Listening</button>':''}<button class="tab" onclick="switchTab('exercises',this)">✏️ Exercícios</button></div>
+  <div id="tab-vocab"><div class="vocab-grid">${lesson.vocab.map(v=>`<div class="vocab-item">${v.img?`<img src="${v.img}" alt="${v.w}" style="width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:8px" onerror="this.style.display='none'">`:''}<div class="vocab-word">${v.w}</div><div class="vocab-phonetic">${v.p}</div><div class="vocab-def">${v.d}</div><div class="vocab-example">${v.e}</div></div>`).join('')}</div><div style="margin-top:1.5rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap"><button class="btn-sm primary" onclick="switchTab('${hasG?'grammar':hasL?'listening':'exercises'}',document.querySelectorAll('.tab')[1])">Próximo →</button><button class="btn-sm" onclick="downloadPDF('${lesson.id}')">📄 Baixar PDF</button></div></div>
+  ${hasG?`<div id="tab-grammar" style="display:none"><div class="card"><div style="font-family:var(--font-display);font-size:1.2rem;color:var(--accent);margin-bottom:.5rem">${lesson.grammar.title}</div><p style="font-size:14px;color:var(--text2);margin-bottom:1rem">${lesson.grammar.explanation}</p><div class="grammar-box">${lesson.grammar.rules.map(r=>`<div class="grammar-rule"><strong style="color:var(--accent)">${r.s}</strong><span>${r.f} — <em style="color:var(--text2)">${r.e}</em></span></div>`).join('')}<div class="tip-box">${lesson.grammar.tip}</div></div></div><div style="margin-top:1rem;text-align:center"><button class="btn-sm primary" onclick="switchTab('${hasL?'listening':'exercises'}',document.querySelectorAll('.tab')[${hasG?2:1}])">Próximo →</button></div></div>`:''}
+  ${hasL?`<div id="tab-listening" style="display:none"><div class="card"><div style="font-family:var(--font-display);font-size:1.1rem;color:var(--accent);margin-bottom:1rem">${lesson.listening.title}</div><div style="background:var(--accent);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap"><div style="color:#fff;font-size:13px;opacity:.8;flex:1">🔊 Ouça o diálogo:</div><div style="display:flex;gap:8px;align-items:center"><button onclick="playTTS()" id="play-btn" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:.5rem 1.25rem;border-radius:8px;cursor:pointer;font-size:14px;font-family:var(--font-body)">▶ Ouvir</button><button onclick="stopTTS()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:.5rem .75rem;border-radius:8px;cursor:pointer;font-family:var(--font-body)">⏹</button><select id="tts-speed" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:3px 6px;font-size:13px;font-family:var(--font-body)"><option value="0.7">Lenta</option><option value="0.9" selected>Normal</option><option value="1.1">Rápida</option></select></div></div><div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">📄 Transcript:</div><div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem">${lesson.listening.transcript.map((t,i)=>`<div id="tline-${i}" style="display:flex;gap:10px;padding:.6rem .75rem;background:var(--bg);border-radius:8px;border-left:3px solid var(--accent2);transition:all .3s"><span style="font-weight:600;font-size:13px;color:var(--accent);min-width:60px">${t.sp}:</span><span style="font-size:14px">${t.ln}</span></div>`).join('')}</div><div style="font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">❓ Questions:</div>${lesson.listening.questions.map((q,i)=>`<div class="exercise" id="lq-${i}"><div class="exercise-q">L${i+1}. ${q.q}</div><div class="exercise-options">${q.o.map((opt,oi)=>`<button class="option-btn" id="lopt-${i}-${oi}" onclick="selectL(${i},${oi})">${opt}</button>`).join('')}</div></div>`).join('')}<div id="l-result"></div><button class="btn-sm primary" onclick="submitL()">Verificar</button></div><div style="margin-top:1rem;text-align:center"><button class="btn-sm primary" onclick="switchTab('exercises',document.querySelectorAll('.tab')[${hasG?3:2}])">Ir para Exercícios →</button></div></div>`:''}
+  <div id="tab-exercises" style="display:none"><div class="card">${lesson.exercises.map((ex,i)=>renderEx(ex,i)).join('')}<div id="quiz-result"></div><div style="margin-top:1.5rem"><button class="btn-sm primary" id="submit-btn" onclick="submitQuiz()">Verificar Respostas</button></div></div></div>`;
+}
+
+function renderEx(ex,i){
+  if(ex.t==='m')return `<div class="exercise"><div class="exercise-q">${i+1}. ${ex.q}</div><div class="exercise-options">${ex.o.map((opt,oi)=>`<button class="option-btn" id="opt-${i}-${oi}" onclick="selectOpt(${i},${oi})">${opt}</button>`).join('')}</div></div>`;
+  return `<div class="exercise"><div class="exercise-q">${i+1}. ${ex.q}</div><input class="fill-input" type="text" id="fill-${i}" placeholder="Digite sua resposta..." style="max-width:320px"></div>`;
+}
+
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  ['tab-vocab','tab-grammar','tab-listening','tab-exercises'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+  const t=document.getElementById('tab-'+tab);
+  if(t)t.style.display='';
+  stopTTS();
+}
+
+function selectOpt(i,oi){if(quizSubmitted)return;quizAnswers[i]=oi;document.querySelectorAll(`[id^="opt-${i}-"]`).forEach(b=>b.style.background='');const b=document.getElementById(`opt-${i}-${oi}`);if(b)b.style.background='var(--accent-light)';}
+function selectL(i,oi){if(listeningSubmitted)return;listeningAnswers[i]=oi;document.querySelectorAll(`[id^="lopt-${i}-"]`).forEach(b=>b.style.background='');const b=document.getElementById(`lopt-${i}-${oi}`);if(b)b.style.background='var(--accent-light)';}
+
+function submitL(){
+  if(!currentLesson?.listening)return;
+  listeningSubmitted=true;
+  let correct=0;
+  currentLesson.listening.questions.forEach((q,i)=>{
+    const sel=listeningAnswers[i];
+    const cb=document.getElementById(`lopt-${i}-${q.a}`);
+    if(sel!==undefined){const sb=document.getElementById(`lopt-${i}-${sel}`);if(sel===q.a){if(sb)sb.classList.add('correct');correct++;}else{if(sb)sb.classList.add('wrong');if(cb)cb.classList.add('correct');}}else{if(cb)cb.classList.add('correct');}
+  });
+  const score=Math.round(correct/currentLesson.listening.questions.length*100);
+  const r=document.getElementById('l-result');
+  if(r)r.innerHTML=`<div class="result-banner ${score>=60?'pass':'fail'}" style="margin-bottom:1rem"><div class="result-score">${score}%</div><div style="font-size:14px;margin-top:4px">${correct} de ${currentLesson.listening.questions.length} corretas</div></div>`;
+}
+
+function submitQuiz(){
+  if(!currentLesson)return;
+  quizSubmitted=true;
+  let correct=0;
+  currentLesson.exercises.forEach((ex,i)=>{
+    if(ex.t==='m'){const sel=quizAnswers[i];if(sel!==undefined){const sb=document.getElementById(`opt-${i}-${sel}`);const cb=document.getElementById(`opt-${i}-${ex.a}`);if(sel===ex.a){if(sb)sb.classList.add('correct');correct++;}else{if(sb)sb.classList.add('wrong');if(cb)cb.classList.add('correct');}}else{const cb=document.getElementById(`opt-${i}-${ex.a}`);if(cb)cb.classList.add('correct');}}
+    else{const inp=document.getElementById(`fill-${i}`);if(inp){if(inp.value.trim().toLowerCase()===ex.a.toLowerCase()){inp.style.borderColor='#2A7D3A';inp.style.background='#EAF7EC';correct++;}else{inp.style.borderColor='var(--red)';inp.style.background='var(--red-light)';}}}
+  });
+  const score=Math.round(correct/currentLesson.exercises.length*100);
+  const pass=score>=60;
+  const r=document.getElementById('quiz-result');
+  if(r)r.innerHTML=`<div class="result-banner ${pass?'pass':'fail'}"><div class="result-score">${score}%</div><div style="font-size:15px;margin-top:4px">${correct} de ${currentLesson.exercises.length} corretas</div><div style="font-size:14px;margin-top:8px;opacity:.8">${pass?'🎉 Aula concluída com sucesso!':'📚 Continue praticando!'}</div></div>`;
+  if(pass&&!(currentUser.completedLessons||[]).includes(currentLesson.id)){
+    if(!currentUser.completedLessons)currentUser.completedLessons=[];
+    currentUser.completedLessons.push(currentLesson.id);
+    const u=DB_USERS.find(x=>x.id===currentUser.id);
+    if(u)u.completedLessons=currentUser.completedLessons;
+    saveUsers().catch(()=>{});
+    showNotif('✅ Aula concluída! Progresso salvo.');
+  }
+  const btn=document.getElementById('submit-btn');
+  if(btn){btn.textContent='Refazer';btn.onclick=()=>navigate('lesson',currentLesson.id);}
+}
+
+// TTS
+let ttsSpeaking=false,ttsLines=[],ttsIdx=0;
+function playTTS(){
+  if(!currentLesson?.listening)return;
+  if(!window.speechSynthesis){showNotif('Navegador não suporta TTS.');return;}
+  stopTTS();ttsSpeaking=true;ttsLines=currentLesson.listening.transcript;ttsIdx=0;
+  const btn=document.getElementById('play-btn');if(btn)btn.textContent='⏸ Reproduzindo...';
+  speakIdx(0);
+}
+function speakIdx(i){
+  if(!ttsSpeaking||i>=ttsLines.length){const btn=document.getElementById('play-btn');if(btn)btn.textContent='▶ Ouvir novamente';ttsSpeaking=false;hlLine(-1);return;}
+  hlLine(i);
+  const speed=parseFloat(document.getElementById('tts-speed')?.value||'0.9');
+  const u=new SpeechSynthesisUtterance(ttsLines[i].ln);
+  u.lang='en-US';u.rate=speed;
+  const voices=window.speechSynthesis.getVoices();
+  const v=voices.find(x=>x.lang.startsWith('en')&&x.name.toLowerCase().includes('google'))||voices.find(x=>x.lang==='en-US')||voices.find(x=>x.lang.startsWith('en'));
+  if(v)u.voice=v;
+  u.onend=()=>{if(ttsSpeaking)setTimeout(()=>speakIdx(i+1),400);};
+  u.onerror=()=>speakIdx(i+1);
+  window.speechSynthesis.speak(u);
+}
+function hlLine(i){document.querySelectorAll('[id^="tline-"]').forEach((el,j)=>{el.style.background=j===i?'var(--accent-light)':'var(--bg)';el.style.borderLeftColor=j===i?'var(--accent)':'var(--accent2)';});}
+function stopTTS(){window.speechSynthesis?.cancel();ttsSpeaking=false;hlLine(-1);const btn=document.getElementById('play-btn');if(btn)btn.textContent='▶ Ouvir';}
+
+// PDF
+function downloadPDF(lessonId){
+  const lesson=Object.values(LESSONS).flat().find(l=>l.id===lessonId);
+  if(!lesson)return;
+  const level=getLessonLevel(lessonId);
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;max-width:750px;margin:0 auto;padding:30px;color:#1A1714}.header{text-align:center;border-bottom:3px solid #2C4A3E;padding-bottom:15px;margin-bottom:25px}.logo{font-size:28px;font-weight:bold;color:#2C4A3E}.logo span{color:#C8922A}h2{color:#2C4A3E;font-size:16px;border-left:4px solid #4A7C6F;padding-left:10px;margin-top:25px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th{background:#2C4A3E;color:white;padding:8px 10px;text-align:left;font-size:13px}td{padding:7px 10px;border-bottom:1px solid #eee;font-size:13px}tr:nth-child(even) td{background:#F5F2EC}.ex{margin-bottom:18px}.eq{font-weight:bold;font-size:13px;margin-bottom:8px}.opt{font-size:12px;padding:4px 8px;border:1px solid #ccc;border-radius:4px;margin:2px 0}.line{border-bottom:1px solid #333;display:inline-block;width:150px;margin:0 4px}.gb{background:#E8F0EE;border-radius:8px;padding:12px 15px;margin-bottom:15px}.gr{display:grid;grid-template-columns:140px 1fr;gap:10px;padding:6px 0;border-bottom:1px solid #ccc;font-size:12px}.gr:last-child{border-bottom:none}.tip{background:#FBF3E3;border:1px solid #C8922A;border-radius:6px;padding:8px 12px;font-size:12px;margin-top:10px}.footer{text-align:center;margin-top:30px;padding-top:15px;border-top:1px solid #eee;font-size:11px;color:#9E9892}</style></head><body><div class="header"><div class="logo">English<span>Path</span></div><div style="font-size:20px;font-weight:bold;margin:8px 0">${lesson.title}</div><div style="font-size:13px;color:#6B6560">Nível: ${level} | Data: ${new Date().toLocaleDateString('pt-BR')} | Aluno(a): ________________________</div></div><h2>📖 Vocabulário</h2><table><tr><th>Palavra</th><th>Pronúncia</th><th>Tradução</th><th>Exemplo</th></tr>${lesson.vocab.map(v=>`<tr><td><strong>${v.w}</strong></td><td>${v.p}</td><td>${v.d}</td><td><em>${v.e}</em></td></tr>`).join('')}</table>${lesson.grammar?`<h2>📝 Gramática — ${lesson.grammar.title}</h2><div class="gb"><p style="font-size:12px;margin:0 0 10px">${lesson.grammar.explanation}</p>${lesson.grammar.rules.map(r=>`<div class="gr"><strong>${r.s}</strong><span>${r.f} — <em>${r.e}</em></span></div>`).join('')}<div class="tip">${lesson.grammar.tip}</div></div>`:''}<h2>✏️ Exercícios</h2>${lesson.exercises.map((ex,i)=>`<div class="ex"><div class="eq">${i+1}. ${ex.q}</div>${ex.t==='m'?ex.o.map(opt=>`<div class="opt">( ) ${opt}</div>`).join(''):`<p style="font-size:13px">Resposta: <span class="line"></span></p>`}</div>`).join('')}<div class="footer">EnglishPath — englishpathnet.netlify.app</div></body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const win=window.open(url,'_blank');
+  if(win)win.onload=()=>setTimeout(()=>win.print(),500);
+  showNotif('📄 PDF aberto! Use Ctrl+P para imprimir.');
+}
+
+// TEACHER ACTIONS
+async function toggleModule(modId,value){DB_MODULE_UNLOCKS[modId]=value;await saveUnlocks();showNotif(`Módulo ${value?'liberado':'bloqueado'}.`);navigate(currentView);}
+async function toggleLesson(lessonId,value){DB_LESSON_UNLOCKS[lessonId]=value;await saveUnlocks();showNotif(`Aula ${value?'liberada':'bloqueada'}.`);navigate(currentView);}
+async function promoteStudent(userId){const u=DB_USERS.find(x=>x.id===userId);if(!u)return;const lvs=['A1','A2','B1','B2','C1','C2'];const i=lvs.indexOf(u.level||'A1');if(i<lvs.length-1){u.level=lvs[i+1];await saveUsers();showNotif(`${u.name} promovido para ${u.level}!`);navigate('students');}else showNotif('Já está no nível máximo.');}
+async function resetStudent(userId){const u=DB_USERS.find(x=>x.id===userId);if(!u)return;u.completedLessons=[];u.level='A1';u.quizScores={};await saveUsers();showNotif(`Progresso de ${u.name} resetado.`);navigate('students');}
+
+function showNotif(msg){const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),3000);}
+
+// Expose to window
+window.switchAuthTab=switchAuthTab;window.doLogin=doLogin;window.doRegister=doRegister;window.doLogout=doLogout;window.navigate=navigate;window.toggleModule=toggleModule;window.toggleLesson=toggleLesson;window.promoteStudent=promoteStudent;window.resetStudent=resetStudent;window.selectOpt=selectOpt;window.selectL=selectL;window.submitL=submitL;window.submitQuiz=submitQuiz;window.switchTab=switchTab;window.playTTS=playTTS;window.stopTTS=stopTTS;window.downloadPDF=downloadPDF;
+</script>
+</body>
+</html>
